@@ -1,34 +1,46 @@
 import { AvatarGenerator } from "@/components/avatar-generator";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-background">
-      <div className="w-full max-w-5xl mx-auto">
-        <header className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
+    <div className="flex min-h-screen flex-col bg-background font-body">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
+          <div className="flex items-center gap-3">
             <Image
               src="/logo.png"
               alt="Anubis Dog AI Logo"
-              width={48}
-              height={48}
-              className="w-12 h-12 sm:w-16 sm:h-16"
+              width={32}
+              height={32}
             />
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-headline text-primary">
+            <span className="font-headline text-xl text-foreground">
               Anubis Dog AI
-            </h1>
+            </span>
           </div>
-          <p className="text-base sm:text-lg text-muted-foreground font-body max-w-2xl mx-auto">
-            Transform your profile picture into a masterpiece of ancient royalty
-            with a futuristic Anubis twist.
-          </p>
-        </header>
-        <main>
-          <AvatarGenerator />
-        </main>
-      </div>
-      <footer className="text-center mt-8 text-muted-foreground text-xs sm:text-sm font-body">
-        <p>Become part of Anubis Dog AI — Transform your profile now.</p>
+          <nav className="hidden md:flex items-center gap-4 text-sm font-medium text-muted-foreground">
+            <a href="#upload" className="hover:text-primary">
+              Upload
+            </a>
+            <a href="#preview" className="hover:text-primary">
+              Adjust
+            </a>
+            <a href="#style" className="hover:text-primary">
+              Style
+            </a>
+            <a href="#download" className="hover:text-primary">
+              Download
+            </a>
+          </nav>
+        </div>
+      </header>
+
+      <main className="flex-1">
+        <AvatarGenerator />
+      </main>
+
+      <footer className="py-8 text-center text-muted-foreground text-sm">
+        <p>&copy; {new Date().getFullYear()} Anubis Dog AI. All Rights Reserved.</p>
       </footer>
     </div>
   );
