@@ -31,7 +31,7 @@ export default function Home() {
         <div className="container max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 px-4">
           <p>&copy; {new Date().getFullYear()} Anubis Dog AI. All Rights Reserved.</p>
           <div className="flex items-center gap-4">
-            <a href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://x.com/ctoando" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
               <Twitter className="h-5 w-5" />
             </a>
             <a href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
