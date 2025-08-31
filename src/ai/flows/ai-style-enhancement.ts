@@ -34,8 +34,14 @@ export async function aiStyleEnhancement(input: AIStyleEnhancementInput): Promis
 
 const aiStyleEnhancementPrompt = ai.definePrompt({
   name: 'aiStyleEnhancementPrompt',
+  input: {
+    schema: z.object({
+      avatarDataUri: z.string(),
+      contentType: z.string(),
+    }),
+  },
   prompt: [
-    {media: {url: '{{{avatarDataUri}}}'}},
+    {media: {url: '{{{avatarDataUri}}}', contentType: '{{{contentType}}}'}},
     {
       text: `A stylized portrait of a person wearing an ancient Egyptian Pharaoh headdress, futuristic Anubis aesthetic, glowing edges, golden and blue details, highly detailed, digital art, 4K, trending on ArtStation
 
@@ -57,7 +63,14 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async input => {
-    const {media} = await aiStyleEnhancementPrompt(input);
+    const contentType = input.avatarDataUri.match(/data:(.*);base64,/)?.[1];
+    if (!contentType) {
+      throw new Error('Invalid data URI: content type not found.');
+    }
+    const {media} = await aiStyleEnhancementPrompt({
+      ...input,
+      contentType,
+    });
     return {stylizedAvatarDataUri: media!.url!};
   }
 );
