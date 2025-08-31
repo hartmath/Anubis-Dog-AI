@@ -3,22 +3,22 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-8 bg-background">
+    <div className="flex min-h-screen flex-col items-center justify-center p-4 sm:p-6 bg-background">
       <div className="w-full max-w-5xl mx-auto">
-        <header className="text-center mb-8 md:mb-12">
-          <div className="flex items-center justify-center gap-4 mb-2">
+        <header className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <Image
               src="/logo.png"
               alt="Anubis Dog AI Logo"
-              width={64}
-              height={64}
-              className="w-16 h-16"
+              width={48}
+              height={48}
+              className="w-12 h-12 sm:w-16 sm:h-16"
             />
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline text-primary">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-headline text-primary">
               Anubis Dog AI
             </h1>
           </div>
-          <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-muted-foreground font-body max-w-2xl mx-auto">
             Transform your profile picture into a masterpiece of ancient royalty
             with a futuristic Anubis twist.
           </p>
@@ -27,7 +27,7 @@ export default function Home() {
           <AvatarGenerator />
         </main>
       </div>
-      <footer className="text-center mt-8 md:mt-12 text-muted-foreground text-sm font-body">
+      <footer className="text-center mt-8 text-muted-foreground text-xs sm:text-sm font-body">
         <p>Become part of Anubis Dog AI — Transform your profile now.</p>
       </footer>
     </div>

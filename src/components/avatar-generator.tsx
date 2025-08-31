@@ -144,8 +144,8 @@ export function AvatarGenerator() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+    <div className="space-y-4 md:space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
         <Card className="aspect-square w-full flex items-center justify-center bg-card/50 border-2 border-dashed border-primary/50 relative overflow-hidden group transition-all hover:border-primary hover:shadow-2xl hover:shadow-primary/20">
           <CardContent className="p-0 w-full h-full flex flex-col items-center justify-center">
             {originalImage ? (
@@ -157,12 +157,12 @@ export function AvatarGenerator() {
                 data-ai-hint="person portrait"
               />
             ) : (
-              <div className="text-center text-muted-foreground p-8">
-                <ImageIcon className="mx-auto h-16 w-16 mb-4" />
-                <h3 className="font-headline text-2xl mb-2 text-foreground">
+              <div className="text-center text-muted-foreground p-4 sm:p-8">
+                <ImageIcon className="mx-auto h-12 w-12 sm:h-16 sm:w-16 mb-4" />
+                <h3 className="font-headline text-xl sm:text-2xl mb-2 text-foreground">
                   Upload Your Portrait
                 </h3>
-                <p>Start by uploading a clear, front-facing photo.</p>
+                <p className="text-sm sm:text-base">Start by uploading a clear, front-facing photo.</p>
               </div>
             )}
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -185,8 +185,8 @@ export function AvatarGenerator() {
           <CardContent className="p-0 w-full h-full flex items-center justify-center">
             {isLoading && (
               <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-                <p className="text-lg text-primary font-headline">
+                <Loader2 className="h-12 w-12 sm:h-16 sm:w-16 animate-spin text-primary mb-4" />
+                <p className="text-base sm:text-lg text-primary font-headline">
                   Conjuring your avatar...
                 </p>
               </div>
@@ -200,14 +200,14 @@ export function AvatarGenerator() {
                 data-ai-hint="pharaoh headdress"
               />
             ) : (
-              <div className="text-center text-muted-foreground p-8">
-                <div className="p-4 bg-primary/10 rounded-full inline-block mb-4">
-                  <Wand2 className="h-12 w-12 text-primary" />
+              <div className="text-center text-muted-foreground p-4 sm:p-8">
+                <div className="p-3 sm:p-4 bg-primary/10 rounded-full inline-block mb-4">
+                  <Wand2 className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
                 </div>
-                <h3 className="font-headline text-2xl mb-2 text-foreground">
+                <h3 className="font-headline text-xl sm:text-2xl mb-2 text-foreground">
                   Your Masterpiece Awaits
                 </h3>
-                <p>Your AI-generated Anubis avatar will appear here.</p>
+                <p className="text-sm sm:text-base">Your AI-generated Anubis avatar will appear here.</p>
               </div>
             )}
           </CardContent>
@@ -219,7 +219,7 @@ export function AvatarGenerator() {
           onClick={handleGenerate}
           disabled={!originalImage || isLoading}
           size="lg"
-          className="w-full sm:w-64 font-bold text-lg py-7"
+          className="w-full sm:w-64 font-bold text-base sm:text-lg py-6 sm:py-7"
         >
           {isLoading ? (
             <>
