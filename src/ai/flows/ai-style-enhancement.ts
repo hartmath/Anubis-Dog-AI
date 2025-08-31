@@ -44,7 +44,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
       prompt: [
         {media: {url: input.avatarDataUri}},
         {
-          text: `Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front to the person in the image. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around the neck, made of gold and inlaid with blue and turquoise gemstones. It is extremely important that you DO NOT change the person's face at all. Keep the original face. The final image should be a realistic photo.`,
+          text: `Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front to the person in the image. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around the neck, made of gold and inlaid with blue and turquoise gemstones. It is extremely important that you DO NOT change the person's face at all. Keep the original face, paying special attention to the eyes to ensure they remain identical to the original photo. The final image should be a realistic photo.`,
         },
       ],
       config: {
