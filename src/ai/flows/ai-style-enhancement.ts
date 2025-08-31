@@ -44,11 +44,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
       prompt: [
         {media: {url: input.avatarDataUri}},
         {
-          text: `A stylized portrait of a person wearing an ancient Egyptian Pharaoh headdress, futuristic Anubis aesthetic, glowing edges, golden and blue details, highly detailed, digital art, 4K, trending on ArtStation
-
-Negative Prompt:
-
-blurry, distorted, cropped face, broken headdress, low quality, artifacts, watermark`,
+          text: `Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front to the person in the image. It is extremely important that you DO NOT change the person's face at all. Keep the original face. The final image should be a realistic photo.`,
         },
       ],
       config: {
