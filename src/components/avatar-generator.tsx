@@ -25,7 +25,7 @@ export function AvatarGenerator() {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState<string>(styles[3].id);
+  const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -105,12 +105,42 @@ export function AvatarGenerator() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
       
-      ctx.drawImage(img, 0, 0, 1080, 1080);
+      const logo = new window.Image();
+      logo.src = "/logo.png";
+      logo.onload = () => {
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+        
+        // Draw watermark
+        ctx.globalAlpha = 0.8;
+        const logoWidth = 120;
+        const logoHeight = 120;
+        const padding = 20;
+        ctx.drawImage(logo, padding, canvas.height - logoHeight - padding, logoWidth, logoHeight);
 
-      const link = document.createElement("a");
-      link.download = "anubis-dog-ai-avatar-1080x1080.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+        ctx.fillStyle = "hsla(var(--primary-foreground) / 0.8)";
+        ctx.font = "24px 'PT Sans', sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText("Anubis Dog AI", padding + logoWidth + 10, canvas.height - (logoHeight / 2) - padding);
+        ctx.globalAlpha = 1.0;
+
+        const link = document.createElement("a");
+        link.download = "anubis-dog-ai-avatar.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
+      logo.onerror = () => {
+         // Fallback to just text if logo fails
+        ctx.drawImage(img, 0, 0, 1080, 1080);
+        ctx.fillStyle = "hsla(var(--primary-foreground) / 0.7)";
+        ctx.font = "bold 24px 'PT Sans', sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText("Anubis Dog AI", 1060, 1060);
+        const link = document.createElement("a");
+        link.download = "anubis-dog-ai-avatar.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      }
     };
     img.onerror = () => {
       toast({
@@ -124,17 +154,17 @@ export function AvatarGenerator() {
   return (
     <div className="container max-w-5xl mx-auto py-12 md:py-20 px-4">
       <section id="upload" className="text-center">
-        <h1 className="text-4xl md:text-5xl font-headline text-primary mb-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-headline text-primary mb-4">
           Transform Your Profile Picture
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-          Drag & drop your photo or click to upload. Our AI will work its magic to help you create a stunning new profile picture.
+        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+          Upload your photo, choose a style, and let our AI create a stunning new avatar for you, inspired by ancient Egypt.
         </p>
         <div 
-          className="w-full max-w-lg mx-auto aspect-video rounded-lg border-2 border-dashed border-primary/50 flex flex-col items-center justify-center text-center p-8 cursor-pointer group hover:border-primary transition-colors"
+          className="w-full max-w-md mx-auto aspect-video rounded-lg border-2 border-dashed border-primary/50 flex flex-col items-center justify-center text-center p-6 md:p-8 cursor-pointer group hover:border-primary transition-colors"
           onClick={triggerFileInput}
         >
-           <Upload className="w-12 h-12 text-primary mb-4 transition-transform group-hover:scale-110" />
+           <Upload className="w-10 h-10 md:w-12 md:h-12 text-primary mb-4 transition-transform group-hover:scale-110" />
            <p className="font-semibold text-foreground">Click to upload or drag and drop</p>
            <p className="text-sm text-muted-foreground mt-1">PNG, JPG, WEBP (Max. 10MB)</p>
            <input
@@ -147,101 +177,112 @@ export function AvatarGenerator() {
         </div>
       </section>
 
-      {(originalImage || generatedImage) && (
-        <section id="preview" className="mt-16 md:mt-24">
-          <div className="text-center">
-            <h2 className="text-3xl md:text-4xl font-headline text-foreground mb-2">Preview & Adjust</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our AI has generated your new avatar. The preview is shown on the right.
+      {(originalImage) && (
+        <>
+          <section id="style" className="mt-12 md:mt-16 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Choose Your Style</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Select a preset to apply a unique visual filter to your creation.
             </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 items-center">
-            <div className="aspect-square rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
-                {originalImage ? (
-                  <Image
-                    src={originalImage}
-                    alt="Original user upload"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <ImageIcon className="w-24 h-24 text-muted-foreground" />
-                )}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+              {styles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedStyle(style.id)}
+                  className={cn(
+                    "aspect-square rounded-lg flex items-center justify-center text-center text-lg md:text-xl font-headline p-4 transition-all duration-300",
+                    "bg-secondary hover:bg-primary/20",
+                    selectedStyle === style.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  {style.name}
+                </button>
+              ))}
             </div>
-            <div className="aspect-square rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
-                {isLoading && (
-                  <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
-                    <Loader2 className="h-16 w-16 animate-spin text-primary mb-4" />
-                    <p className="text-lg text-primary font-headline">
-                      Conjuring your avatar...
-                    </p>
-                  </div>
-                )}
-                {generatedImage ? (
-                  <Image
-                    src={generatedImage}
-                    alt="Generated Anubis Avatar"
-                    fill
-                    className="object-cover animate-in fade-in duration-500"
-                  />
-                ) : (
-                  <div className="p-8 text-center text-muted-foreground">
-                    <Wand2 className="w-24 h-24 mx-auto text-primary" />
-                    <p className="mt-4">Your AI generated avatar will appear here.</p>
-                  </div>
-                )}
+          </section>
+
+          <section id="generate" className="mt-12 md:mt-16 text-center">
+             <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Generate Your Avatar</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Ready to show off your new look? Click the button to generate your final image.
+            </p>
+            <Button
+              onClick={handleGenerate}
+              disabled={!originalImage || isLoading}
+              size="lg"
+              className="w-full max-w-sm mx-auto font-bold text-lg py-7 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </section>
+        </>
+      )}
+
+      {(originalImage || generatedImage) && (
+        <section id="preview" className="mt-12 md:mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-center">
+            <div className="flex flex-col items-center">
+              <h3 className="text-xl md:text-2xl font-headline text-foreground mb-4">Original</h3>
+              <div className="aspect-square w-full max-w-md rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
+                  {originalImage ? (
+                    <Image
+                      src={originalImage}
+                      alt="Original user upload"
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <ImageIcon className="w-16 h-16 md:w-24 md:h-24 text-muted-foreground" />
+                  )}
+              </div>
+            </div>
+             <div className="flex flex-col items-center">
+               <h3 className="text-xl md:text-2xl font-headline text-foreground mb-4">Generated</h3>
+              <div className="aspect-square w-full max-w-md rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
+                  {isLoading && (
+                    <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
+                      <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin text-primary mb-4" />
+                      <p className="text-base md:text-lg text-primary font-headline">
+                        Conjuring your avatar...
+                      </p>
+                    </div>
+                  )}
+                  {generatedImage ? (
+                    <Image
+                      src={generatedImage}
+                      alt="Generated Anubis Avatar"
+                      fill
+                      className="object-cover animate-in fade-in duration-500"
+                    />
+                  ) : (
+                    <div className="p-8 text-center text-muted-foreground">
+                      <Wand2 className="w-16 h-16 md:w-24 md:h-24 mx-auto text-primary" />
+                      <p className="mt-4 text-sm md:text-base">Your AI generated avatar will appear here.</p>
+                    </div>
+                  )}
+              </div>
             </div>
           </div>
         </section>
       )}
 
-      <section id="style" className="mt-16 md:mt-24 text-center">
-        <h2 className="text-3xl md:text-4xl font-headline text-foreground mb-2">Choose Your Style</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-          Select a preset to apply a unique visual filter to your creation.
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-          {styles.map((style) => (
-            <button
-              key={style.id}
-              onClick={() => setSelectedStyle(style.id)}
-              className={cn(
-                "aspect-square rounded-lg flex items-center justify-center text-xl font-headline p-4 transition-all duration-300",
-                "bg-secondary hover:bg-primary/20",
-                selectedStyle === style.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background text-primary" : "text-muted-foreground"
-              )}
-            >
-              {style.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section id="download" className="mt-16 md:mt-24 text-center">
-        <h2 className="text-3xl md:text-4xl font-headline text-foreground mb-2">Generate & Download</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-          Ready to show off your new look? Generate your final image.
-        </p>
-        <Button
-          onClick={handleGenerate}
-          disabled={!originalImage || isLoading}
-          size="lg"
-          className="w-full max-w-sm mx-auto font-bold text-lg py-7 bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Wand2 className="mr-2 h-5 w-5" />
-              Generate
-            </>
-          )}
-        </Button>
-        {generatedImage &&
-          <div className="mt-4">
+      {generatedImage &&
+        <section id="download" className="mt-12 md:mt-16 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Download Your Creation</h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Your avatar is ready! Download it now and share it with the world.
+          </p>
+          <div className="flex flex-col items-center">
             <Button
               onClick={handleDownload}
               variant="default"
@@ -249,12 +290,11 @@ export function AvatarGenerator() {
               className="w-full max-w-sm mx-auto font-bold text-lg py-7"
             >
               <Download className="mr-2 h-5 w-5" />
-              Download (1080x1080 PNG)
+              Download (PNG)
             </Button>
-            <p className="text-xs text-muted-foreground mt-2">Watermark: Anubis Dog AI - Transform Your Profile Now</p>
           </div>
-        }
-      </section>
+        </section>
+      }
     </div>
   );
 }
