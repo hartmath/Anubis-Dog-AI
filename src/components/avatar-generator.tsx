@@ -109,7 +109,7 @@ export function AvatarGenerator() {
       ctx.fillText(watermarkText, canvas.width / 2, canvas.height - padding / 2.5);
 
       const link = document.createElement("a");
-      link.download = "pharaoh-avatar.png";
+      link.download = "anubis-dog-ai-avatar.png";
       link.href = canvas.toDataURL("image/png");
       link.click();
     };
@@ -186,7 +186,7 @@ export function AvatarGenerator() {
                 <h3 className="font-headline text-2xl mb-2 text-foreground">
                   Your Masterpiece Awaits
                 </h3>
-                <p>Your AI-generated Pharaoh avatar will appear here.</p>
+                <p>Your AI-generated Anubis avatar will appear here.</p>
               </div>
             )}
           </CardContent>

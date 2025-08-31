@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
-  title: "Pharaoh Avatar",
-  description: "Generate your own Pharaoh-style AI avatar.",
+  title: "Anubis Dog AI",
+  description: "Generate your own Anubis Dog AI avatar.",
 };
 
 export default function RootLayout({

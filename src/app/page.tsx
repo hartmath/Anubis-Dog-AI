@@ -9,7 +9,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4 mb-2">
             <Pyramid className="w-10 h-10 text-primary" />
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline text-primary">
-              Pharaoh Avatar
+              Anubis Dog AI
             </h1>
           </div>
           <p className="text-lg text-muted-foreground font-body max-w-2xl mx-auto">
