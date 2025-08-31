@@ -1,5 +1,5 @@
 import { AvatarGenerator } from "@/components/avatar-generator";
-import { Pyramid } from "lucide-react";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -7,7 +7,13 @@ export default function Home() {
       <div className="w-full max-w-5xl mx-auto">
         <header className="text-center mb-8 md:mb-12">
           <div className="flex items-center justify-center gap-4 mb-2">
-            <Pyramid className="w-10 h-10 text-primary" />
+            <Image
+              src="/logo.png"
+              alt="Anubis Dog AI Logo"
+              width={64}
+              height={64}
+              className="w-16 h-16"
+            />
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline text-primary">
               Anubis Dog AI
             </h1>

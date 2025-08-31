@@ -89,29 +89,50 @@ export function AvatarGenerator() {
 
       ctx.drawImage(img, 0, 0);
 
-      const watermarkText = "Anubis Dog AI";
-      const fontSize = Math.max(12, Math.min(img.width / 20, img.height / 20));
-      const padding = fontSize * 1.5;
+      const watermarkLogo = new window.Image();
+      watermarkLogo.src = "/logo.png";
+      watermarkLogo.onload = () => {
+        const watermarkHeight = Math.max(20, canvas.height * 0.1);
+        const watermarkWidth =
+          (watermarkLogo.width / watermarkLogo.height) * watermarkHeight;
+        const padding = watermarkHeight * 0.25;
 
-      ctx.font = `bold ${fontSize}px "Playfair Display", serif`;
-      ctx.textAlign = "center";
+        ctx.globalAlpha = 0.8;
+        ctx.drawImage(
+          watermarkLogo,
+          canvas.width - watermarkWidth - padding,
+          canvas.height - watermarkHeight - padding,
+          watermarkWidth,
+          watermarkHeight
+        );
+        ctx.globalAlpha = 1.0;
 
-      ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-      const textHeight = fontSize + padding / 2;
-      ctx.fillRect(
-        0,
-        canvas.height - textHeight,
-        canvas.width,
-        textHeight
-      );
+        const link = document.createElement("a");
+        link.download = "anubis-dog-ai-avatar.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
+      watermarkLogo.onerror = () => {
+        // Fallback to text watermark if logo fails
+        const watermarkText = "Anubis Dog AI";
+        const fontSize = Math.max(
+          12,
+          Math.min(img.width / 20, img.height / 20)
+        );
+        ctx.font = `bold ${fontSize}px "Playfair Display", serif`;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.textAlign = "right";
+        ctx.fillText(
+          watermarkText,
+          canvas.width - fontSize,
+          canvas.height - fontSize
+        );
 
-      ctx.fillStyle = "#FFD700"; // Gold
-      ctx.fillText(watermarkText, canvas.width / 2, canvas.height - padding / 2.5);
-
-      const link = document.createElement("a");
-      link.download = "anubis-dog-ai-avatar.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
+        const link = document.createElement("a");
+        link.download = "anubis-dog-ai-avatar.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+      };
     };
     img.onerror = () => {
       toast({
