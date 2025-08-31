@@ -32,30 +32,6 @@ export async function aiStyleEnhancement(input: AIStyleEnhancementInput): Promis
   return aiStyleEnhancementFlow(input);
 }
 
-const aiStyleEnhancementPrompt = ai.definePrompt({
-  name: 'aiStyleEnhancementPrompt',
-  input: {
-    schema: z.object({
-      avatarDataUri: z.string(),
-      contentType: z.string(),
-    }),
-  },
-  prompt: [
-    {media: {url: '{{{avatarDataUri}}}', contentType: '{{{contentType}}}'}},
-    {
-      text: `A stylized portrait of a person wearing an ancient Egyptian Pharaoh headdress, futuristic Anubis aesthetic, glowing edges, golden and blue details, highly detailed, digital art, 4K, trending on ArtStation
-
-Negative Prompt:
-
-blurry, distorted, cropped face, broken headdress, low quality, artifacts, watermark`,
-    },
-  ],
-  model: 'googleai/gemini-2.0-flash-preview-image-generation',
-  config: {
-    responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE, IMAGE only won't work
-  },
-});
-
 const aiStyleEnhancementFlow = ai.defineFlow(
   {
     name: 'aiStyleEnhancementFlow',
@@ -63,14 +39,27 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async input => {
-    const contentType = input.avatarDataUri.match(/data:(.*);base64,/)?.[1];
-    if (!contentType) {
-      throw new Error('Invalid data URI: content type not found.');
-    }
-    const {media} = await aiStyleEnhancementPrompt({
-      ...input,
-      contentType,
+    const {media} = await ai.generate({
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+      prompt: [
+        {media: {url: input.avatarDataUri}},
+        {
+          text: `A stylized portrait of a person wearing an ancient Egyptian Pharaoh headdress, futuristic Anubis aesthetic, glowing edges, golden and blue details, highly detailed, digital art, 4K, trending on ArtStation
+
+Negative Prompt:
+
+blurry, distorted, cropped face, broken headdress, low quality, artifacts, watermark`,
+        },
+      ],
+      config: {
+        responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE, IMAGE only won't work
+      },
     });
-    return {stylizedAvatarDataUri: media!.url!};
+
+    if (!media?.url) {
+      throw new Error('The AI failed to generate an image.');
+    }
+
+    return {stylizedAvatarDataUri: media.url};
   }
 );
