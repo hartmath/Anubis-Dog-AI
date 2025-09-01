@@ -27,14 +27,14 @@ export function AvatarGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const styleSectionRef = useRef<HTMLElement>(null);
+  const generateSectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (originalImage && styleSectionRef.current) {
-      styleSectionRef.current.scrollIntoView({
+    if (originalImage && generateSectionRef.current) {
+      generateSectionRef.current.scrollIntoView({
         behavior: 'smooth',
-        block: 'start',
+        block: 'center',
       });
     }
   }, [originalImage]);
@@ -187,57 +187,6 @@ export function AvatarGenerator() {
         </div>
       </section>
 
-      {(originalImage) && (
-        <>
-          <section id="style" ref={styleSectionRef} className="mt-12 md:mt-16 text-center scroll-mt-20">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Choose Your Style</h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Select a preset to apply a unique visual filter to your creation.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-              {styles.map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => setSelectedStyle(style.id)}
-                  className={cn(
-                    "aspect-square rounded-lg flex items-center justify-center text-center text-lg md:text-xl font-headline p-4 transition-all duration-300",
-                    "bg-secondary hover:bg-primary/20",
-                    selectedStyle === style.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background text-primary" : "text-muted-foreground"
-                  )}
-                >
-                  {style.name}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <section id="generate" className="mt-12 md:mt-16 text-center">
-             <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Generate Your Avatar</h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-              Ready to show off your new look? Click the button to generate your final image.
-            </p>
-            <Button
-              onClick={handleGenerate}
-              disabled={!originalImage || isLoading}
-              size="lg"
-              className="w-full max-w-sm mx-auto font-bold text-lg py-7 bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="mr-2 h-5 w-5" />
-                  Generate
-                </>
-              )}
-            </Button>
-          </section>
-        </>
-      )}
-
       {(originalImage || generatedImage) && (
         <section id="preview" className="mt-12 md:mt-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-center">
@@ -284,6 +233,49 @@ export function AvatarGenerator() {
             </div>
           </div>
         </section>
+      )}
+
+      {(originalImage) && (
+        <section id="generate" ref={generateSectionRef} className="mt-12 md:mt-16 text-center scroll-mt-20">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Generate Your Avatar</h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              Select a preset, then click generate to create your masterpiece.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+              {styles.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedStyle(style.id)}
+                  className={cn(
+                    "aspect-square rounded-lg flex items-center justify-center text-center text-lg md:text-xl font-headline p-4 transition-all duration-300",
+                    "bg-secondary hover:bg-primary/20",
+                    selectedStyle === style.id ? "ring-2 ring-primary ring-offset-2 ring-offset-background text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  {style.name}
+                </button>
+              ))}
+            </div>
+
+            <Button
+              onClick={handleGenerate}
+              disabled={!originalImage || isLoading}
+              size="lg"
+              className="w-full max-w-sm mx-auto font-bold text-lg py-7 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Generate
+                </>
+              )}
+            </Button>
+          </section>
       )}
 
       {generatedImage &&
