@@ -136,7 +136,7 @@ export function AvatarGenerator() {
 
         const link = document.createElement("a");
         const uniqueId = Math.random().toString(36).substring(2, 8);
-        link.download = `anubis-dog-ai-${uniqueId}.png`;
+        link.download = `ANDO-${uniqueId}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       };
@@ -149,7 +149,7 @@ export function AvatarGenerator() {
         ctx.fillText("Anubis Dog AI", 1060, 1060);
         const link = document.createElement("a");
         const uniqueId = Math.random().toString(36).substring(2, 8);
-        link.download = `anubis-dog-ai-${uniqueId}.png`;
+        link.download = `ANDO-${uniqueId}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       }
