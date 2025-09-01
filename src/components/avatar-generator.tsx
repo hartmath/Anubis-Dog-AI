@@ -189,7 +189,7 @@ export function AvatarGenerator() {
 
       {(originalImage || generatedImage) && (
         <section id="preview" className="mt-12 md:mt-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-start">
             <div className="flex flex-col items-center">
               <h3 className="text-xl md:text-2xl font-headline text-foreground mb-4">Original</h3>
               <div className="aspect-square w-full max-w-md rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
@@ -205,8 +205,8 @@ export function AvatarGenerator() {
                   )}
               </div>
             </div>
-             <div className="flex flex-col items-center">
-               <h3 className="text-xl md:text-2xl font-headline text-foreground mb-4">Generated</h3>
+             <div className="flex flex-col items-center gap-4">
+               <h3 className="text-xl md:text-2xl font-headline text-foreground">Generated</h3>
               <div className="aspect-square w-full max-w-md rounded-lg bg-secondary flex items-center justify-center relative overflow-hidden">
                   {isLoading && (
                     <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
@@ -230,6 +230,17 @@ export function AvatarGenerator() {
                     </div>
                   )}
               </div>
+              {generatedImage && (
+                <Button
+                  onClick={handleDownload}
+                  variant="default"
+                  size="lg"
+                  className="w-full max-w-md font-bold text-lg py-7"
+                >
+                  <Download className="mr-2 h-5 w-5" />
+                  Download (PNG)
+                </Button>
+              )}
             </div>
           </div>
         </section>
@@ -278,25 +289,6 @@ export function AvatarGenerator() {
           </section>
       )}
 
-      {generatedImage &&
-        <section id="download" className="mt-12 md:mt-16 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Download Your Creation</h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Your avatar is ready! Download it now and share it with the world.
-          </p>
-          <div className="flex flex-col items-center">
-            <Button
-              onClick={handleDownload}
-              variant="default"
-              size="lg"
-              className="w-full max-w-sm mx-auto font-bold text-lg py-7"
-            >
-              <Download className="mr-2 h-5 w-5" />
-              Download (PNG)
-            </Button>
-          </div>
-        </section>
-      }
     </div>
   );
 }
