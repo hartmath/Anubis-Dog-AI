@@ -6,6 +6,29 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Anubis Dog AI",
   description: "Generate your own Anubis Dog AI avatar.",
+  icons: {
+    icon: "/logo.png",
+  },
+  openGraph: {
+    title: "Anubis Dog AI",
+    description: "Generate your own Anubis Dog AI avatar.",
+    images: [
+      {
+        url: "/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "Anubis Dog AI",
+      },
+    ],
+    url: "https://anubisdog.ai",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anubis Dog AI",
+    description: "Generate your own Anubis Dog AI avatar.",
+    images: ["/logo.png"],
+  },
 };
 
 export default function RootLayout({
