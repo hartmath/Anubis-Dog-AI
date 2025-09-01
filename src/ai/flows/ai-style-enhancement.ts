@@ -33,51 +33,30 @@ export async function aiStyleEnhancement(input: AIStyleEnhancementInput): Promis
   return aiStyleEnhancementFlow(input);
 }
 
-const descriptionPrompt = ai.definePrompt({
-  name: 'getFaceDescriptionPrompt',
-  input: {
-    schema: z.object({
-      avatarDataUri: z.string(),
-    }),
-  },
-  prompt: `Describe the face of the person in this image in detail. Focus on facial features, expression, hair, and any accessories. Do not mention their body or clothing.
-
-Image: {{media url=avatarDataUri}}`,
-  model: 'googleai/gemini-1.5-flash',
-});
-
-
 const aiStyleEnhancementFlow = ai.defineFlow(
   {
     name: 'aiStyleEnhancementFlow',
     inputSchema: AIStyleEnhancementInputSchema,
     outputSchema: AIStyleEnhancementOutputSchema,
   },
-  async input => {
-    // Step 1: Get a description of the face from the input image.
-    const {output: faceDescription} = await descriptionPrompt(input);
-    if (!faceDescription) {
-      throw new Error('Could not get a description of the face from the image.');
-    }
-
-    // Step 2: Use the description to generate a new image.
-    const stylePrompt = `A photorealistic avatar of a person.
-    
-    The person's face is described as: ${faceDescription}.
-    
-    The person is wearing a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. They also have a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones.
-    
-    The style of the image should be: ${input.style}.`;
+  async (input) => {
+    const stylePrompt = `An avatar of a person. Do not change their face. Add a classic blue and gold striped pharaoh's headdress (Nemes) and an ornate Egyptian collar (Usekh). The style of the image should be: ${input.style}.`;
 
     const {media} = await ai.generate({
-      model: 'googleai/imagen-4.0-fast-generate-001',
-      prompt: stylePrompt
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+      prompt: [
+        { media: { url: input.avatarDataUri } },
+        { text: stylePrompt },
+      ],
+      config: {
+        responseModalities: ['TEXT', 'IMAGE'],
+      },
     });
 
     if (!media?.url) {
       throw new Error('The AI failed to generate an image. The response did not contain image data.');
     }
-
+    
     return {stylizedAvatarDataUri: media.url};
   }
 );
