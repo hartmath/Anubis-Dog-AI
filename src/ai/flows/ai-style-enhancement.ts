@@ -25,7 +25,8 @@ const AIStyleEnhancementOutputSchema = z.object({
     .string()
     .describe(
       "The data URI of the stylized avatar image, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
+    ).optional(),
+  error: z.string().optional(),
 });
 export type AIStyleEnhancementOutput = z.infer<typeof AIStyleEnhancementOutputSchema>;
 
@@ -40,21 +41,28 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async input => {
-    const {media} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: [
-        { media: { url: input.avatarDataUri } },
-        { text: `Take the provided image of a person. Do not change their face, eyes, or expression. Keep the original face. Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones. Apply the following style: ${input.style}`},
-      ],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
-    });
+    try {
+      const {media} = await ai.generate({
+        model: 'googleai/gemini-2.0-flash-preview-image-generation',
+        prompt: [
+          { media: { url: input.avatarDataUri } },
+          { text: `Take the provided image of a person. Do not change their face, eyes, or expression. Keep the original face. Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones. Apply the following style: ${input.style}`},
+        ],
+        config: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        },
+      });
 
-    if (!media?.url) {
-      throw new Error('The AI failed to generate an image. The response did not contain image data.');
+      if (!media?.url) {
+        throw new Error('The AI failed to generate an image. The response did not contain image data.');
+      }
+
+      return {stylizedAvatarDataUri: media.url};
+    } catch (e: any) {
+      if (e.message && e.message.includes('429 Too Many Requests')) {
+        return { error: 'RATE_LIMIT_EXCEEDED' };
+      }
+      throw e;
     }
-
-    return {stylizedAvatarDataUri: media.url};
   }
 );

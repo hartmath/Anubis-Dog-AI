@@ -8,8 +8,10 @@ import {
   Download,
   Loader2,
   ImageIcon,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { aiStyleEnhancement } from "@/ai/flows/ai-style-enhancement";
 import { cn } from "@/lib/utils";
@@ -27,6 +29,7 @@ export function AvatarGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
   const [downloadCount, setDownloadCount] = useState(1);
+  const [rateLimitError, setRateLimitError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generateSectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
@@ -63,6 +66,7 @@ export function AvatarGenerator() {
       reader.onload = (e) => {
         setOriginalImage(e.target?.result as string);
         setGeneratedImage(null);
+        setRateLimitError(false);
       };
       reader.readAsDataURL(file);
     }
@@ -77,13 +81,17 @@ export function AvatarGenerator() {
 
     setIsLoading(true);
     setGeneratedImage(null);
+    setRateLimitError(false);
 
     try {
       const result = await aiStyleEnhancement({ 
         avatarDataUri: originalImage,
         style: selectedStyle,
       });
-      if (result.stylizedAvatarDataUri) {
+
+      if (result.error === 'RATE_LIMIT_EXCEEDED') {
+        setRateLimitError(true);
+      } else if (result.stylizedAvatarDataUri) {
         setGeneratedImage(result.stylizedAvatarDataUri);
       } else {
         throw new Error("The AI failed to generate an image.");
@@ -255,6 +263,17 @@ export function AvatarGenerator() {
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
               Select a preset, then click generate to create your masterpiece.
             </p>
+
+            {rateLimitError && (
+              <Alert variant="destructive" className="max-w-2xl mx-auto mb-8 text-left">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Free Daily Limit Reached</AlertTitle>
+                <AlertDescription>
+                  We've hit the maximum number of free image generations for today. Please try again tomorrow. This helps us keep the service available for everyone.
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
               {styles.map((style) => (
                 <button
