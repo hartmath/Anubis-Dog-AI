@@ -135,8 +135,7 @@ export function AvatarGenerator() {
         ctx.globalAlpha = 1.0;
 
         const link = document.createElement("a");
-        const uniqueId = Math.random().toString(36).substring(2, 8);
-        link.download = `ANDO_${uniqueId}.png`;
+        link.download = `ANDO_1.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       };
@@ -148,8 +147,7 @@ export function AvatarGenerator() {
         ctx.textAlign = "right";
         ctx.fillText("Anubis Dog AI", 1060, 1060);
         const link = document.createElement("a");
-        const uniqueId = Math.random().toString(36).substring(2, 8);
-        link.download = `ANDO_${uniqueId}.png`;
+        link.download = `ANDO_1.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       }
