@@ -26,6 +26,7 @@ export function AvatarGenerator() {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
+  const [downloadCount, setDownloadCount] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generateSectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
@@ -135,9 +136,10 @@ export function AvatarGenerator() {
         ctx.globalAlpha = 1.0;
 
         const link = document.createElement("a");
-        link.download = `ANDO_1.png`;
+        link.download = `ANDO_${downloadCount}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
+        setDownloadCount(prevCount => prevCount + 1);
       };
       logo.onerror = () => {
          // Fallback to just text if logo fails
@@ -147,9 +149,10 @@ export function AvatarGenerator() {
         ctx.textAlign = "right";
         ctx.fillText("Anubis Dog AI", 1060, 1060);
         const link = document.createElement("a");
-        link.download = `ANDO_1.png`;
+        link.download = `ANDO_${downloadCount}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
+        setDownloadCount(prevCount => prevCount + 1);
       }
     };
     img.onerror = () => {
