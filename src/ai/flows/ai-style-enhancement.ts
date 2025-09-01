@@ -14,7 +14,7 @@ const AIStyleEnhancementInputSchema = z.object({
   avatarDataUri: z
     .string()
     .describe(
-      "The data URI of the avatar image to be stylized, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "The data URI of the avatar image to be stylized, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
   style: z.string().describe("The visual style to apply to the avatar."),
 });
@@ -40,19 +40,29 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async (input) => {
-    const stylePrompt = `An avatar of a person. Do not change their face. Add a classic blue and gold striped pharaoh's headdress (Nemes) and an ornate Egyptian collar (Usekh). The style of the image should be: ${input.style}.`;
-
-    const {media} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+    // Step 1: Analyze the user's photo to get a description.
+    const analysisResponse = await ai.generate({
+      model: 'googleai/gemini-1.5-flash',
       prompt: [
         { media: { url: input.avatarDataUri } },
-        { text: stylePrompt },
+        { text: "Describe the person in this photo in a short, simple, descriptive phrase for an image generation AI. Focus on key facial features, hair, and expression. For example: 'A smiling woman with long brown hair' or 'A man with a beard and glasses'." },
       ],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
     });
 
+    const facialDescription = analysisResponse.text;
+
+    if (!facialDescription) {
+      throw new Error('The AI failed to analyze the uploaded image.');
+    }
+
+    // Step 2: Generate a new image based on the description and style.
+    const stylePrompt = `An avatar of a person. The person should look like this: "${facialDescription}". Add a classic blue and gold striped pharaoh's headdress (Nemes) and an ornate Egyptian collar (Usekh). The style of the image should be: ${input.style}.`;
+
+    const {media} = await ai.generate({
+      model: 'googleai/imagen-4.0-fast-generate-001',
+      prompt: stylePrompt,
+    });
+    
     if (!media?.url) {
       throw new Error('The AI failed to generate an image. The response did not contain image data.');
     }
