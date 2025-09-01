@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ChangeEvent } from "react";
+import { useState, useRef, type ChangeEvent, useEffect } from "react";
 import Image from "next/image";
 import {
   Upload,
@@ -27,7 +27,17 @@ export function AvatarGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const styleSectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (originalImage && styleSectionRef.current) {
+      styleSectionRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  }, [originalImage]);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -179,7 +189,7 @@ export function AvatarGenerator() {
 
       {(originalImage) && (
         <>
-          <section id="style" className="mt-12 md:mt-16 text-center">
+          <section id="style" ref={styleSectionRef} className="mt-12 md:mt-16 text-center scroll-mt-20">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-headline text-foreground mb-2">Choose Your Style</h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
               Select a preset to apply a unique visual filter to your creation.
