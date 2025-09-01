@@ -136,7 +136,7 @@ export function AvatarGenerator() {
         ctx.globalAlpha = 1.0;
 
         const link = document.createElement("a");
-        link.download = `ANDO_${downloadCount}.png`;
+        link.download = `$ANDO_${downloadCount}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
         setDownloadCount(prevCount => prevCount + 1);
@@ -149,7 +149,7 @@ export function AvatarGenerator() {
         ctx.textAlign = "right";
         ctx.fillText("Anubis Dog AI", 1060, 1060);
         const link = document.createElement("a");
-        link.download = `ANDO_${downloadCount}.png`;
+        link.download = `$ANDO_${downloadCount}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
         setDownloadCount(prevCount => prevCount + 1);
