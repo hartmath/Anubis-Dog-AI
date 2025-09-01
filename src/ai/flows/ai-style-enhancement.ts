@@ -64,7 +64,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
         { text: `Take the provided image of a person. Do not change their face, eyes, or expression. Keep the original face. Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones. Apply the following style: ${stylePrompt}`},
       ],
       config: {
-        responseModalities: ['IMAGE'],
+        responseModalities: ['TEXT', 'IMAGE'],
       },
     });
 
