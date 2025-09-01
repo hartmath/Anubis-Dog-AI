@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/logo.png",
-        width: 800,
-        height: 420,
+        width: 50,
+        height: 50,
         alt: "Anubis Dog AI",
       },
     ],
