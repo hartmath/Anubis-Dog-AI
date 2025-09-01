@@ -28,8 +28,7 @@ export default function Home() {
       </main>
 
       <footer className="py-6 md:py-8 text-center text-muted-foreground text-xs md:text-sm">
-        <div className="container max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 px-4">
-          <p>&copy; {new Date().getFullYear()} Anubis Dog AI. All Rights Reserved.</p>
+        <div className="container max-w-screen-2xl mx-auto flex flex-col justify-center items-center gap-4 px-4">
           <div className="flex items-center gap-4">
             <a href="https://x.com/ctoando" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
               <Twitter className="h-5 w-5" />
@@ -41,6 +40,7 @@ export default function Home() {
               <TrendingUp className="h-5 w-5" />
             </a>
           </div>
+          <p>&copy; 2025 Anubis Dog AI. All Rights Reserved.</p>
         </div>
       </footer>
     </div>

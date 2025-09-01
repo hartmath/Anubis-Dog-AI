@@ -66,7 +66,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
         },
       ],
       config: {
-        responseModalities: ['TEXT', 'IMAGE'], // MUST provide both TEXT and IMAGE, IMAGE only won't work
+        responseModalities: ['IMAGE'],
       },
     });
 
