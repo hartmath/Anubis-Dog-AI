@@ -56,10 +56,10 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     }
 
     // Step 2: Generate a new image based on the description and style.
-    const stylePrompt = `Generate an avatar image of a person. The person should look exactly like this: "${facialDescription}". Add a classic blue and gold striped pharaoh's headdress (Nemes) and an ornate Egyptian collar (Usekh). The style of the image should be: ${input.style}.`;
+    const stylePrompt = `Generate an avatar of: ${facialDescription}. The person is wearing a classic blue and gold striped pharaoh's headdress and an ornate Egyptian collar. The style of the image should be: ${input.style}.`;
 
     const {media} = await ai.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: 'googleai/imagen-4.0-fast-generate-001',
       prompt: stylePrompt,
     });
     
