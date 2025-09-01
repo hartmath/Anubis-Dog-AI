@@ -40,7 +40,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async (input) => {
-    // Step 1: Analyze the user's photo to get a description.
+    // Step 1: Analyze the user's photo to get a description. This uses a reliable free model.
     const analysisResponse = await ai.generate({
       model: 'googleai/gemini-1.5-flash',
       prompt: [
@@ -55,7 +55,7 @@ const aiStyleEnhancementFlow = ai.defineFlow(
       throw new Error('The AI failed to analyze the uploaded image.');
     }
 
-    // Step 2: Generate a new image based on the description and style.
+    // Step 2: Generate a new image based on the description and style. This uses a free text-to-image model.
     const stylePrompt = `Generate an avatar of: ${facialDescription}. The person is wearing a classic blue and gold striped pharaoh's headdress and an ornate Egyptian collar. The style of the image should be: ${input.style}.`;
 
     const {media} = await ai.generate({
