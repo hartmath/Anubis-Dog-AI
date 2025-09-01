@@ -292,7 +292,7 @@ export function AvatarGenerator() {
 
             <Button
               onClick={handleGenerate}
-              disabled={!originalImage || isLoading}
+              disabled={!originalImage || isLoading || rateLimitError}
               size="lg"
               className="w-full max-w-sm mx-auto font-bold text-lg py-7 bg-primary hover:bg-primary/90 text-primary-foreground"
             >

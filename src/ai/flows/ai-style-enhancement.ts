@@ -59,9 +59,10 @@ const aiStyleEnhancementFlow = ai.defineFlow(
 
       return {stylizedAvatarDataUri: media.url};
     } catch (e: any) {
-      if (e.message && e.message.includes('429 Too Many Requests')) {
+      if (e.message && (e.message.includes('429 Too Many Requests') || e.message.includes('You exceeded your current quota'))) {
         return { error: 'RATE_LIMIT_EXCEEDED' };
       }
+      // Re-throw other errors so they can be caught by the caller
       throw e;
     }
   }
