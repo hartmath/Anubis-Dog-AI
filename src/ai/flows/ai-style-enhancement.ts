@@ -3,8 +3,8 @@
  * @fileOverview AI style enhancement flow that stylizes an avatar using image-to-image diffusion.
  *
  * - aiStyleEnhancement - A function that applies AI style enhancement to an avatar.
- * - AIStyleEnhancementInput - The input type for the aiStyleEnhancement function.
- * - AIStyleEnhancementOutput - The return type for the aiStyleEnhancement function.
+ * - AIStyleEnhancementInput - The input type for the ai-style-enhancement function.
+ * - AIStyleEnhancementOutput - The return type for the ai-style-enhancement function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -33,6 +33,20 @@ export async function aiStyleEnhancement(input: AIStyleEnhancementInput): Promis
   return aiStyleEnhancementFlow(input);
 }
 
+const descriptionPrompt = ai.definePrompt({
+  name: 'getFaceDescriptionPrompt',
+  input: {
+    schema: z.object({
+      avatarDataUri: z.string(),
+    }),
+  },
+  prompt: `Describe the face of the person in this image in detail. Focus on facial features, expression, hair, and any accessories. Do not mention their body or clothing.
+
+Image: {{media url=avatarDataUri}}`,
+  model: 'googleai/gemini-1.5-flash',
+});
+
+
 const aiStyleEnhancementFlow = ai.defineFlow(
   {
     name: 'aiStyleEnhancementFlow',
@@ -40,15 +54,24 @@ const aiStyleEnhancementFlow = ai.defineFlow(
     outputSchema: AIStyleEnhancementOutputSchema,
   },
   async input => {
+    // Step 1: Get a description of the face from the input image.
+    const {output: faceDescription} = await descriptionPrompt(input);
+    if (!faceDescription) {
+      throw new Error('Could not get a description of the face from the image.');
+    }
+
+    // Step 2: Use the description to generate a new image.
+    const stylePrompt = `A photorealistic avatar of a person.
+    
+    The person's face is described as: ${faceDescription}.
+    
+    The person is wearing a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. They also have a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones.
+    
+    The style of the image should be: ${input.style}.`;
+
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: [
-        { media: { url: input.avatarDataUri } },
-        { text: `Take the provided image of a person. Do not change their face, eyes, or expression. Keep the original face. Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones. Apply the following style: ${input.style}`},
-      ],
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-      },
+      model: 'googleai/imagen-4.0-fast-generate-001',
+      prompt: stylePrompt
     });
 
     if (!media?.url) {
