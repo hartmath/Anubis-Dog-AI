@@ -11,14 +11,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { aiStyleEnhancement } from "@/ai/flows/ai-style-enhancement";
 import { cn } from "@/lib/utils";
 
 const styles = [
-  { id: "Neon Glow", name: "Neon Glow" },
-  { id: "Dark Gold", name: "Dark Gold" },
-  { id: "Cyberpunk Blue", name: "Cyberpunk Blue" },
-  { id: "Cosmic Purple", name: "Cosmic Purple" },
+  { id: "Neon Glow", name: "Neon Glow", color: "hsla(328, 100%, 54%, 0.3)" },
+  { id: "Dark Gold", name: "Dark Gold", color: "hsla(45, 85%, 50%, 0.3)" },
+  { id: "Cyberpunk Blue", name: "Cyberpunk Blue", color: "hsla(217, 100%, 50%, 0.3)" },
+  { id: "Cosmic Purple", name: "Cosmic Purple", color: "hsla(270, 100%, 60%, 0.3)" },
 ];
 
 export function AvatarGenerator() {
@@ -78,16 +77,67 @@ export function AvatarGenerator() {
     setIsLoading(true);
     setGeneratedImage(null);
 
+    // Simulate a short delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     try {
-      const result = await aiStyleEnhancement({ 
-        avatarDataUri: originalImage,
-        style: selectedStyle,
-      });
-      if (result.stylizedAvatarDataUri) {
-        setGeneratedImage(result.stylizedAvatarDataUri);
-      } else {
-        throw new Error("The AI failed to generate an image.");
-      }
+      const style = styles.find(s => s.id === selectedStyle);
+      if (!style) throw new Error("Selected style not found.");
+      
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get canvas context.");
+
+      const img = new window.Image();
+      img.crossOrigin = "anonymous";
+      img.src = originalImage;
+
+      img.onload = () => {
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+
+        // Draw original image
+        ctx.drawImage(img, 0, 0);
+
+        // Apply a greyscale filter
+        ctx.globalCompositeOperation = 'saturation';
+        ctx.fillStyle = 'hsl(0, 0%, 0%)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Apply color overlay
+        ctx.globalCompositeOperation = 'color';
+        ctx.fillStyle = style.color.replace('0.3', '0.6'); // Make it stronger
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
+
+        // Add Pharaoh headdress (simple placeholder)
+        const headdress = new window.Image();
+        headdress.src = "/logo.png"; // Using logo as a placeholder graphic
+        headdress.onload = () => {
+          // You would have a real headdress overlay image here
+          // For now, let's just place the logo on top as an example
+          const headdressWidth = canvas.width * 0.8;
+          const headdressHeight = (headdress.height / headdress.width) * headdressWidth;
+          ctx.globalAlpha = 0.5;
+          ctx.drawImage(headdress, (canvas.width - headdressWidth) / 2, -headdressHeight*0.1, headdressWidth, headdressHeight);
+          ctx.globalAlpha = 1.0;
+          
+          setGeneratedImage(canvas.toDataURL("image/png"));
+          setIsLoading(false);
+        }
+        headdress.onerror = () => {
+          // If headdress fails, still show the colorized image
+           setGeneratedImage(canvas.toDataURL("image/png"));
+           setIsLoading(false);
+        }
+      };
+
+      img.onerror = () => {
+        throw new Error("Failed to load original image onto canvas.");
+      };
+
     } catch (error) {
       console.error(error);
       toast({
@@ -98,11 +148,10 @@ export function AvatarGenerator() {
             ? error.message
             : "An unknown error occurred. Please try again.",
       });
-    } finally {
       setIsLoading(false);
     }
   };
-
+  
   const handleDownload = () => {
     if (!generatedImage) return;
 
