@@ -1,7 +1,7 @@
 import { AvatarGenerator } from "@/components/avatar-generator";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Facebook, Instagram, Twitter } from "lucide-react";
+import { Twitter, TrendingUp } from "lucide-react";
 
 export default function Home() {
   return (
@@ -36,6 +36,9 @@ export default function Home() {
             </a>
             <a href="https://t.me/andocto" target="_blank" rel="noopener noreferrer" aria-label="Telegram" className="text-muted-foreground hover:text-primary transition-colors">
               <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M9.78 18.65l.28-4.23l7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3L3.64 12c-.88-.25-.89-1.37.2-1.64l16.4-5.98c.72-.26 1.39.24 1.15 1.1l-3.3 15.55c-.27.9-.96 1.12-1.78.73l-5.42-3.99l-2.55 2.45c-.28.27-.64.44-1.01.44z"></path></svg>
+            </a>
+            <a href="https://www.geckoterminal.com/ton/pools/EQDLTkY_oTODgSiqcrsYcmQ1Jf8XY3PDX3DIXuGD2q2-V6CC" target="_blank" rel="noopener noreferrer" aria-label="GeckoTerminal" className="text-muted-foreground hover:text-primary transition-colors">
+              <TrendingUp className="h-5 w-5" />
             </a>
           </div>
         </div>
