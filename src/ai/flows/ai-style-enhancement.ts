@@ -58,15 +58,12 @@ const aiStyleEnhancementFlow = ai.defineFlow(
 
 
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: [
-        {media: {url: input.avatarDataUri}},
-        {
-          text: `Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front to the person in the image. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around the neck, made of gold and inlaid with blue and turquoise gemstones. ${stylePrompt}`,
-        },
+      model: 'googleai/imagen-4.0-fast-generate-001',
+      prompt: `Take the provided image of a person. Do not change their face or eyes. Add a classic blue and gold striped pharaoh's headdress (Nemes) with a cobra (Uraeus) on the front. Also, add a wide, ornate Egyptian collar (a Usekh or Wesekh) around their neck, made of gold and inlaid with blue and turquoise gemstones. Apply the following style: ${stylePrompt}`,
+      input: [
+        { media: { url: input.avatarDataUri } }
       ],
       config: {
-        responseModalities: ['IMAGE'],
         negativePrompt: 'Do not change the person\'s face. Do not alter the eyes. Keep the original face.',
       },
     });
