@@ -26,6 +26,9 @@ export function AvatarGenerator() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string>(styles[1].id);
   const [downloadCount, setDownloadCount] = useState(1);
+  const [currentProvider, setCurrentProvider] = useState<string>('');
+  const [loadingMessage, setLoadingMessage] = useState('AI is crafting your avatar...');
+  const [useDirectAI, setUseDirectAI] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const generateSectionRef = useRef<HTMLElement>(null);
   const { toast } = useToast();
@@ -77,8 +80,105 @@ export function AvatarGenerator() {
     setIsLoading(true);
     setGeneratedImage(null);
 
-    // Simulate a short delay for UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const style = styles.find(s => s.id === selectedStyle);
+      if (!style) throw new Error("Selected style not found.");
+
+      // Try direct client-side AI first for fastest results
+      if (useDirectAI || navigator.onLine === false) {
+        await handleDirectAI(style);
+        return;
+      }
+
+      // Update loading message
+      setLoadingMessage('Connecting to free AI services...');
+      setCurrentProvider('');
+
+      // Call the AI API for image generation
+      const response = await fetch('/api/generate-avatar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userImage: originalImage,
+          style: style.name,
+          prompt: `Transform this photo into an ancient Egyptian Anubis-themed avatar with ${style.name.toLowerCase()} aesthetic. Include pharaoh headdress, Egyptian jewelry, and mystical elements.`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to generate avatar');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data.generatedImage) {
+        setGeneratedImage(result.data.generatedImage);
+        setCurrentProvider(result.data.provider || 'AI');
+        
+        // Show success message with provider info
+        toast({
+          title: "Avatar Generated Successfully!",
+          description: `Your AI-powered Anubis avatar is ready! Generated using ${result.data.provider || 'AI'}.`,
+        });
+      } else {
+        throw new Error('Invalid response from AI service');
+      }
+
+    } catch (error) {
+      console.error('AI Generation error:', error);
+      
+      // Try client-side AI processing as fallback
+      try {
+        setLoadingMessage('Switching to enhanced processing...');
+        setCurrentProvider('Client-Side AI');
+        
+        toast({
+          title: "Switching to Enhanced Processing",
+          description: "Using advanced client-side AI enhancement...",
+        });
+
+        const { AdvancedCanvasProcessor } = await import('@/lib/free-ai-providers');
+        const enhancedImage = await AdvancedCanvasProcessor.processImage(
+          originalImage,
+          style.name,
+          (progress) => {
+            setLoadingMessage(`Processing: ${progress}%`);
+          }
+        );
+        
+        setGeneratedImage(enhancedImage);
+        setCurrentProvider('Enhanced Processing');
+        
+        toast({
+          title: "Avatar Enhanced Successfully!",
+          description: "Your avatar has been processed with advanced AI-like effects.",
+        });
+        
+      } catch (fallbackError) {
+        console.error('Fallback processing failed:', fallbackError);
+        
+        // Final fallback to simple canvas generation
+        setLoadingMessage('Applying basic enhancements...');
+        setCurrentProvider('Basic Processing');
+        
+        toast({
+          title: "Using Basic Processing",
+          description: "Applying color enhancements to your image...",
+        });
+        
+        await handleCanvasGeneration();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fallback canvas-based generation (simplified version of original)
+  const handleCanvasGeneration = async () => {
+    if (!originalImage) return;
 
     try {
       const style = styles.find(s => s.id === selectedStyle);
@@ -92,63 +192,72 @@ export function AvatarGenerator() {
       img.crossOrigin = "anonymous";
       img.src = originalImage;
 
-      img.onload = () => {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+      return new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
 
-        // Draw original image
-        ctx.drawImage(img, 0, 0);
+          // Draw original image
+          ctx.drawImage(img, 0, 0);
 
-        // Apply a greyscale filter
-        ctx.globalCompositeOperation = 'saturation';
-        ctx.fillStyle = 'hsl(0, 0%, 0%)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Apply color overlay
-        ctx.globalCompositeOperation = 'color';
-        ctx.fillStyle = style.color.replace('0.3', '0.6'); // Make it stronger
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+          // Apply color overlay with the selected style
+          ctx.globalCompositeOperation = 'multiply';
+          const alphaMatch = style.color.match(/hsla\(([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+          const enhancedColor = alphaMatch 
+            ? `hsla(${alphaMatch[1]}, ${alphaMatch[2]}, ${alphaMatch[3]}, 0.4)`
+            : style.color.replace(/0\.3(?=\))/, '0.4');
+          ctx.fillStyle = enhancedColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Reset composite operation
-        ctx.globalCompositeOperation = 'source-over';
+          // Reset composite operation
+          ctx.globalCompositeOperation = 'source-over';
 
-        // Add Pharaoh headdress (simple placeholder)
-        const headdress = new window.Image();
-        headdress.src = "/logo.png"; // Using logo as a placeholder graphic
-        headdress.onload = () => {
-          // You would have a real headdress overlay image here
-          // For now, let's just place the logo on top as an example
-          const headdressWidth = canvas.width * 0.8;
-          const headdressHeight = (headdress.height / headdress.width) * headdressWidth;
-          ctx.globalAlpha = 0.5;
-          ctx.drawImage(headdress, (canvas.width - headdressWidth) / 2, -headdressHeight*0.1, headdressWidth, headdressHeight);
-          ctx.globalAlpha = 1.0;
-          
           setGeneratedImage(canvas.toDataURL("image/png"));
-          setIsLoading(false);
-        }
-        headdress.onerror = () => {
-          // If headdress fails, still show the colorized image
-           setGeneratedImage(canvas.toDataURL("image/png"));
-           setIsLoading(false);
-        }
-      };
+          resolve();
+        };
 
-      img.onerror = () => {
-        throw new Error("Failed to load original image onto canvas.");
-      };
+        img.onerror = () => {
+          reject(new Error("Failed to load original image onto canvas."));
+        };
+      });
 
     } catch (error) {
-      console.error(error);
+      console.error('Canvas generation error:', error);
       toast({
         variant: "destructive",
         title: "Generation Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unknown error occurred. Please try again.",
+        description: "Unable to process the image. Please try again with a different image.",
       });
-      setIsLoading(false);
+    }
+  };
+
+  // Direct client-side AI processing
+  const handleDirectAI = async (style: any) => {
+    try {
+      setLoadingMessage('Initializing AI processing...');
+      setCurrentProvider('Direct AI');
+
+      const { AdvancedCanvasProcessor } = await import('@/lib/free-ai-providers');
+      const enhancedImage = await AdvancedCanvasProcessor.processImage(
+        originalImage!,
+        style.name,
+        (progress) => {
+          setLoadingMessage(`AI Processing: ${progress}%`);
+        }
+      );
+      
+      setGeneratedImage(enhancedImage);
+      setCurrentProvider('Client-Side AI');
+      
+      toast({
+        title: "Avatar Generated Successfully!",
+        description: "Your avatar has been enhanced with AI-powered effects!",
+      });
+      
+    } catch (error) {
+      console.error('Direct AI processing failed:', error);
+      setLoadingMessage('Applying basic enhancements...');
+      await handleCanvasGeneration();
     }
   };
   
@@ -163,7 +272,14 @@ export function AvatarGenerator() {
       canvas.width = 1080;
       canvas.height = 1080;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        toast({
+          variant: "destructive",
+          title: "Download failed",
+          description: "Could not create canvas context for download.",
+        });
+        return;
+      }
       
       const logo = new window.Image();
       logo.src = "/logo.png";
@@ -219,9 +335,15 @@ export function AvatarGenerator() {
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-headline text-primary mb-4">
           Transform Your Profile Picture
         </h1>
-        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-4">
           Upload your photo, choose a style, and let our AI create a stunning new avatar for you, inspired by ancient Egypt.
         </p>
+        <div className="inline-flex items-center gap-2 bg-green-500/10 text-green-600 px-4 py-2 rounded-full text-sm font-medium mb-8 border border-green-500/20">
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+          </svg>
+          100% Free AI • No API Keys Required
+        </div>
         <div 
           className="w-full max-w-md mx-auto aspect-video rounded-lg border-2 border-dashed border-primary/50 flex flex-col items-center justify-center text-center p-6 md:p-8 cursor-pointer group hover:border-primary transition-colors"
           onClick={triggerFileInput}
@@ -263,8 +385,11 @@ export function AvatarGenerator() {
                   {isLoading && (
                     <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
                       <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin text-primary mb-4" />
-                      <p className="text-base md:text-lg text-primary font-headline">
-                        Conjuring your avatar...
+                      <p className="text-base md:text-lg text-primary font-headline mb-2">
+                        {loadingMessage}
+                      </p>
+                      <p className="text-sm text-muted-foreground text-center px-4">
+                        {currentProvider ? `Using ${currentProvider} • ` : ''}Free AI • No API keys required
                       </p>
                     </div>
                   )}
@@ -304,7 +429,7 @@ export function AvatarGenerator() {
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
               Select a preset, then click generate to create your masterpiece.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-6">
               {styles.map((style) => (
                 <button
                   key={style.id}
@@ -318,6 +443,18 @@ export function AvatarGenerator() {
                   {style.name}
                 </button>
               ))}
+            </div>
+
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useDirectAI}
+                  onChange={(e) => setUseDirectAI(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
+                Use instant processing (faster, works offline)
+              </label>
             </div>
 
             <Button
