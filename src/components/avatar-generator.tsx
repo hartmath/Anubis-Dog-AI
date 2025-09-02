@@ -106,7 +106,12 @@ export function AvatarGenerator() {
         
         // Apply color overlay
         ctx.globalCompositeOperation = 'color';
-        ctx.fillStyle = style.color.replace('0.3', '0.6'); // Make it stronger
+        // Safely increase alpha from 0.3 to 0.6 by parsing HSLA
+        const alphaMatch = style.color.match(/hsla\(([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+        const enhancedColor = alphaMatch 
+          ? `hsla(${alphaMatch[1]}, ${alphaMatch[2]}, ${alphaMatch[3]}, 0.6)`
+          : style.color.replace(/0\.3(?=\))/, '0.6'); // Fallback with safer regex
+        ctx.fillStyle = enhancedColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Reset composite operation
@@ -163,7 +168,14 @@ export function AvatarGenerator() {
       canvas.width = 1080;
       canvas.height = 1080;
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        toast({
+          variant: "destructive",
+          title: "Download failed",
+          description: "Could not create canvas context for download.",
+        });
+        return;
+      }
       
       const logo = new window.Image();
       logo.src = "/logo.png";
