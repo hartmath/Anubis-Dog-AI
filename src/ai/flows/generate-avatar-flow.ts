@@ -39,7 +39,7 @@ export async function generateAvatar(
     'A majestic, divine Anubis, the Egyptian god of the afterlife. The figure has the body of a powerful, athletic man and the head of a sleek black jackal with intelligent, piercing eyes. Adorned with ornate gold jewelry, including a broad collar, cuffs, and a royal kilt. The background is a dramatic, mystical Egyptian landscape with pyramids under a starry night sky. The style should be hyper-realistic, with cinematic lighting and intricate details, like a high-end digital painting.';
 
   const {media} = await ai.generate({
-    model: 'dall-e-3',
+    model: 'openai/dall-e-3',
     prompt: anubisPrompt,
     // When DALL-E 3 is used with image-to-image capabilities, we can add the input image here.
     // As of now, we will generate based on the prompt.
