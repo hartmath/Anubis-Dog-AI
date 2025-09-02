@@ -77,8 +77,62 @@ export function AvatarGenerator() {
     setIsLoading(true);
     setGeneratedImage(null);
 
-    // Simulate a short delay for UX
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      const style = styles.find(s => s.id === selectedStyle);
+      if (!style) throw new Error("Selected style not found.");
+
+      // Call the AI API for image generation
+      const response = await fetch('/api/generate-avatar', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userImage: originalImage,
+          style: style.name,
+          prompt: `Transform this photo into an ancient Egyptian Anubis-themed avatar with ${style.name.toLowerCase()} aesthetic. Include pharaoh headdress, Egyptian jewelry, and mystical elements.`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to generate avatar');
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data.generatedImage) {
+        setGeneratedImage(result.data.generatedImage);
+        
+        // Show success message with the AI prompt used
+        toast({
+          title: "Avatar Generated Successfully!",
+          description: "Your AI-powered Anubis avatar is ready for download.",
+        });
+      } else {
+        throw new Error('Invalid response from AI service');
+      }
+
+    } catch (error) {
+      console.error('AI Generation error:', error);
+      
+      // Fallback to canvas-based generation if AI fails
+      toast({
+        variant: "destructive",
+        title: "AI Generation Failed",
+        description: "Falling back to basic image processing...",
+      });
+      
+      // Keep the original canvas-based generation as fallback
+      await handleCanvasGeneration();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fallback canvas-based generation (simplified version of original)
+  const handleCanvasGeneration = async () => {
+    if (!originalImage) return;
 
     try {
       const style = styles.find(s => s.id === selectedStyle);
@@ -92,68 +146,42 @@ export function AvatarGenerator() {
       img.crossOrigin = "anonymous";
       img.src = originalImage;
 
-      img.onload = () => {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
+      return new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
 
-        // Draw original image
-        ctx.drawImage(img, 0, 0);
+          // Draw original image
+          ctx.drawImage(img, 0, 0);
 
-        // Apply a greyscale filter
-        ctx.globalCompositeOperation = 'saturation';
-        ctx.fillStyle = 'hsl(0, 0%, 0%)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Apply color overlay
-        ctx.globalCompositeOperation = 'color';
-        // Safely increase alpha from 0.3 to 0.6 by parsing HSLA
-        const alphaMatch = style.color.match(/hsla\(([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
-        const enhancedColor = alphaMatch 
-          ? `hsla(${alphaMatch[1]}, ${alphaMatch[2]}, ${alphaMatch[3]}, 0.6)`
-          : style.color.replace(/0\.3(?=\))/, '0.6'); // Fallback with safer regex
-        ctx.fillStyle = enhancedColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+          // Apply color overlay with the selected style
+          ctx.globalCompositeOperation = 'multiply';
+          const alphaMatch = style.color.match(/hsla\(([^,]+),\s*([^,]+),\s*([^,]+),\s*([^)]+)\)/);
+          const enhancedColor = alphaMatch 
+            ? `hsla(${alphaMatch[1]}, ${alphaMatch[2]}, ${alphaMatch[3]}, 0.4)`
+            : style.color.replace(/0\.3(?=\))/, '0.4');
+          ctx.fillStyle = enhancedColor;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Reset composite operation
-        ctx.globalCompositeOperation = 'source-over';
+          // Reset composite operation
+          ctx.globalCompositeOperation = 'source-over';
 
-        // Add Pharaoh headdress (simple placeholder)
-        const headdress = new window.Image();
-        headdress.src = "/logo.png"; // Using logo as a placeholder graphic
-        headdress.onload = () => {
-          // You would have a real headdress overlay image here
-          // For now, let's just place the logo on top as an example
-          const headdressWidth = canvas.width * 0.8;
-          const headdressHeight = (headdress.height / headdress.width) * headdressWidth;
-          ctx.globalAlpha = 0.5;
-          ctx.drawImage(headdress, (canvas.width - headdressWidth) / 2, -headdressHeight*0.1, headdressWidth, headdressHeight);
-          ctx.globalAlpha = 1.0;
-          
           setGeneratedImage(canvas.toDataURL("image/png"));
-          setIsLoading(false);
-        }
-        headdress.onerror = () => {
-          // If headdress fails, still show the colorized image
-           setGeneratedImage(canvas.toDataURL("image/png"));
-           setIsLoading(false);
-        }
-      };
+          resolve();
+        };
 
-      img.onerror = () => {
-        throw new Error("Failed to load original image onto canvas.");
-      };
+        img.onerror = () => {
+          reject(new Error("Failed to load original image onto canvas."));
+        };
+      });
 
     } catch (error) {
-      console.error(error);
+      console.error('Canvas generation error:', error);
       toast({
         variant: "destructive",
         title: "Generation Failed",
-        description:
-          error instanceof Error
-            ? error.message
-            : "An unknown error occurred. Please try again.",
+        description: "Unable to process the image. Please try again with a different image.",
       });
-      setIsLoading(false);
     }
   };
   
@@ -275,8 +303,11 @@ export function AvatarGenerator() {
                   {isLoading && (
                     <div className="absolute inset-0 bg-background/80 flex flex-col items-center justify-center z-10 backdrop-blur-sm">
                       <Loader2 className="h-12 w-12 md:h-16 md:w-16 animate-spin text-primary mb-4" />
-                      <p className="text-base md:text-lg text-primary font-headline">
-                        Conjuring your avatar...
+                      <p className="text-base md:text-lg text-primary font-headline mb-2">
+                        AI is crafting your avatar...
+                      </p>
+                      <p className="text-sm text-muted-foreground text-center px-4">
+                        Using advanced AI to transform your photo into an ancient Egyptian Anubis avatar
                       </p>
                     </div>
                   )}
