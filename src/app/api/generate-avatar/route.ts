@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateAvatarImage } from '@/ai/flows/image-generation';
+import { FreeAIProviderFactory } from '@/lib/free-ai-providers';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,18 +20,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Call the AI flow
-    const result = await generateAvatarImage({
+    // Use free AI providers
+    const provider = await FreeAIProviderFactory.getBestAvailableProvider();
+    
+    const result = await provider.generateImage({
+      prompt: body.prompt || `Transform this into an ancient Egyptian Anubis-themed avatar with ${body.style} aesthetic. Include pharaoh headdress, Egyptian jewelry, and mystical elements.`,
       userImage: body.userImage,
       style: body.style,
-      prompt: body.prompt || '',
+      width: 1024,
+      height: 1024,
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        generatedImage: result.generatedImage,
+        generatedImage: result.imageUrl,
         prompt: result.prompt,
+        provider: result.provider,
       },
     });
 
