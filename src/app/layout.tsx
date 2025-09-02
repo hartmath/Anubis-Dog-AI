@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://anubisdog.ai"),
   title: "Anubis Dog AI",
   description: "Generate your own Anubis Dog AI avatar.",
   icons: {
