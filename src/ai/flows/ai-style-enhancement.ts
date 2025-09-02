@@ -34,15 +34,17 @@ export async function enhanceWithAIStyle(
   input: AIStyleEnhancementInput
 ): Promise<AIStyleEnhancementOutput> {
   const {media} = await ai.generate({
-    model: 'googleai/gemini-1.5-flash-preview',
+    model: 'openai/dall-e-3',
     prompt: `Enhance the following image with a ${input.style} style.`,
-    input: [
-      {
-        media: {
-          url: input.photoDataUri,
-        },
-      },
-    ],
+    // When DALL-E 3 is used with image-to-image capabilities, we can add the input image here.
+    // As of now, we will generate based on the prompt.
+    // input: [
+    //   {
+    //     media: {
+    //       url: input.photoDataUri,
+    //     },
+    //   },
+    // ],
   });
 
   const generatedImage = media.url;
