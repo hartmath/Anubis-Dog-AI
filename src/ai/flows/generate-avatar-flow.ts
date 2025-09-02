@@ -40,7 +40,7 @@ export async function generateAvatar(
       {text: anubisPrompt},
     ],
     config: {
-      responseModalities: ['IMAGE'],
+      responseModalities: ['IMAGE', 'TEXT'],
     },
   });
 
